@@ -1,0 +1,63 @@
+﻿@inject IUserState UserState
+@inject ProtectedLocalStorage Local
+@inject IDialogService DialogService
+@implements IDisposable
+
+<MudMenu AnchorOrigin="Origin.BottomRight"
+         Class="@Class"
+         TransformOrigin="Origin.TopRight">
+    <ActivatorContent>
+        <MudAvatar Color="Color.Primary" Size="Size.Large">@UserState.User!.FirstName[0]</MudAvatar>
+    </ActivatorContent>
+    <ChildContent>
+        <div class="py-4"
+             style="min-width: 220px">
+            <MudText Class="px-6 pb-2"
+                     Typo="Typo.h4">
+                <b>@UserState.User!.FirstName</b>
+            </MudText>
+            <MudDivider Class="my-2"/>
+            
+            <div class="mt-6 mx-4">
+                <MudButton Color="Color.Error"
+                           FullWidth="true"
+                           StartIcon="@Icons.Material.Filled.Logout"
+                           Variant="Variant.Outlined"
+                           OnClick="LogOut">
+                    Logout
+                </MudButton>
+            </div>
+        </div>
+    </ChildContent>
+</MudMenu>
+
+@code {
+
+    [Parameter]
+    public string Class { get; set; } = null!;
+
+    protected override bool ShouldRender() =>
+        UserState.User is not null;
+    
+    protected override void OnInitialized() =>
+        UserState.DataChange += Invoker;
+
+    public void Dispose() =>
+        UserState.DataChange -= Invoker;
+
+    private async void Invoker() =>
+        await InvokeAsync(StateHasChanged);
+
+    private async void LogOut() {
+        try {
+            UserState.User = null!;
+            await Local.DeleteAsync("Id");
+            UserState.NotifyDataChange();
+        }
+        catch (Exception e) {
+            Console.WriteLine(e);
+            await DialogService.ShowMessageBox("Error", e.Message);
+        }
+    }
+
+}

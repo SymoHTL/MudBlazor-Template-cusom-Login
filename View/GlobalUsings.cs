@@ -11,5 +11,7 @@ global using MudBlazor;
 global using MudBlazor.Services;
 global using View;
 global using System.Diagnostics;
+global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.RazorPages;
+global using Model.Entities.Theme;

@@ -34,11 +34,13 @@ public abstract class ARepository<TEntity> : IRepository<TEntity> where TEntity 
     }
 
     public async Task UpdateAsync(TEntity entity, CancellationToken ct) {
+        _context.ChangeTracker.Clear();
         Set.Update(entity);
         await _context.SaveChangesAsync(ct);
     }
 
     public async Task UpdateAsync(IEnumerable<TEntity> entity, CancellationToken ct) {
+        _context.ChangeTracker.Clear();
         Set.UpdateRange(entity);
         await _context.SaveChangesAsync(ct);
     }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "T61+0DEb6y1LhT9GY5NVzk+NBRC5W+advJXhOhITKg6/BSwPcmTBrhm5MBqbCeJO4xV6nO6xDf82HjtF6V/JCQ==",
+  "dgSpecHash": "wnIwcK4Nxr95vDA7v0JSLqPsAzOCh9S+28fAtKyU268G/9BA0/pnGIZXCF2sGrYrrp4efPQZ1iHAhDTY6J9L+w==",
   "success": true,
-  "projectFilePath": "D:\\SCHULE\\HTL\\4.KLASSE\\SEW\\Setup\\View\\View.csproj",
+  "projectFilePath": "D:\\Tolle Projekte\\MudBlazor-Template-cusom-Login\\View\\View.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\simon\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\simon\\.nuget\\packages\\microsoft.aspnetcore.authorization\\6.0.8\\microsoft.aspnetcore.authorization.6.0.8.nupkg.sha512",

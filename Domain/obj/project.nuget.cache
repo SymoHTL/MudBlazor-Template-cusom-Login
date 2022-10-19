@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "pNTIw+P3hSi1y46FfgvfDRIVDfiGDCBaZLdlTK0+l/QzUOV04YE6JinEpGklmO3qeplt+JkNdKvZP+EURq9YiQ==",
+  "dgSpecHash": "GQo+s1w1U+KErvPJyP3tvuSLUJY7p+Hx2KaNFPTUorox3IDlu/qEgZtzYzWSqQitoYOJi7IrwSWDCVPlApOA+w==",
   "success": true,
-  "projectFilePath": "D:\\SCHULE\\HTL\\4.KLASSE\\SEW\\Setup\\Domain\\Domain.csproj",
+  "projectFilePath": "D:\\Tolle Projekte\\MudBlazor-Template-cusom-Login\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\simon\\.nuget\\packages\\microsoft.aspnetcore.authorization\\6.0.8\\microsoft.aspnetcore.authorization.6.0.8.nupkg.sha512",
     "C:\\Users\\simon\\.nuget\\packages\\microsoft.aspnetcore.components\\6.0.8\\microsoft.aspnetcore.components.6.0.8.nupkg.sha512",

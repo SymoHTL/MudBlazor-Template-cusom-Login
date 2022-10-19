@@ -8,11 +8,16 @@ builder.Services.AddDbContextFactory<ModelDbContext>(
     //.UseLoggerFactory(new NullLoggerFactory()) is to remove mysql query logging
 );
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRoleClaimRepository, RoleClaimRepository>();
+
+
 builder.Services.AddScoped<IThemeHandler, ThemeHandler>();
+builder.Services.AddScoped<IUserState, UserState>();
 builder.Services.AddScoped<CircuitHandler, CircuitTracker>();
 
-
-builder.Services.AddLogging(b => b.AddConsole());
+builder.Services.AddLogging();
 
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();

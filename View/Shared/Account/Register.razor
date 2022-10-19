@@ -1,0 +1,148 @@
+﻿@page "/register"
+@inject NavigationManager Nav
+@inject IUserRepository UserRepo
+@inject ILogger<Register> Logger
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inherits CancellationComponent
+
+<div @onkeydown="TryRegister">
+    <MudForm @ref="_form">
+        <MudCard Style="width: 100%">
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Register</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <div class="d-flex justify-content-between">
+                    <div class="w-40">
+                        <MudTextField
+                            T="string"
+                            InputMode="InputMode.text" InputType="InputType.Text" Immediate="true"
+                            Counter="50" MaxLength="50"
+                            Label="First Name" Required="true"
+                            @bind-Text="RegUser.FirstName"
+                            For="() => RegUser.FirstName"/>
+                    </div>
+                    <div class="w-40">
+                        <MudTextField
+                            T="string"
+                            InputMode="InputMode.text" InputType="InputType.Text" Immediate="true"
+                            Counter="50" MaxLength="50"
+                            Label="Last Name" Required="true"
+                            @bind-Text="RegUser.LastName"
+                            For="() => RegUser.LastName"/>
+                    </div>
+                </div>
+                
+                <MudTextField
+                    T="string"
+                    InputMode="InputMode.text" InputType="InputType.Text"
+                    Counter="50" MaxLength="50"
+                    Label="E-Mail"
+                    Required="true" RequiredError="E-Mail is required!"
+                    @bind-Text="RegUser.Email"
+                    For="() => RegUser.Email"
+                    Validation="@(new Func<string, Task<string>>(ValidateEmail))"/>
+                <MudTextField
+                    T="string"
+                    InputMode="InputMode.text" InputType="_passwordInputType" Immediate="true"
+                    Label="Password" HelperText="Choose a strong password | Min 6 chars | At least 1 number"
+                    Required="true" RequiredError="Password is required!"
+                    Adornment="Adornment.End"
+                    AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ShowPwd"
+                    @bind-Text="RegUser.Password"
+                    For="() => RegUser.Password"/>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="async () => await HandleRegisterAsync()">
+                    Register
+                </MudButton>
+                <MudSpacer/>
+                <a href="login">
+                    <MudText Typo="Typo.subtitle1">
+                        Already have an account?
+                    </MudText>
+                </a>
+            </MudCardActions>
+        </MudCard>
+    </MudForm>
+</div>
+
+
+@code {
+    private MudForm _form = null!;
+
+    private bool _isShow;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+    private InputType _passwordInputType = InputType.Password;
+
+    private User RegUser { get; set; } = new();
+
+    private void ShowPwd() {
+        if (_isShow) {
+            _isShow = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInputType = InputType.Password;
+        }
+        else {
+            _isShow = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInputType = InputType.Text;
+        }
+    }
+
+    private async void TryRegister(KeyboardEventArgs e) {
+        if (e.Code is "Enter" or "NumpadEnter")
+            await HandleRegisterAsync();
+    }
+
+    private async Task HandleRegisterAsync() {
+        if (!await _form.IsFormValidAsync())
+            return;
+        try {
+    // Hash password
+    // Register user
+            await UserRepo.RegisterAsync(RegUser, Cts.Token);
+
+            _form.Reset();
+            Snackbar.Add("Registration successful!", Severity.Success);
+            Nav.NavigateTo("login");
+        }
+        catch (TaskCanceledException) {
+            Logger.LogWarning("Register canceled");
+        }
+        catch (OperationCanceledException) {
+            Logger.LogWarning("Register canceled");
+        }
+        catch (Exception e) {
+            Logger.LogError(e, "Register failed");
+            await DialogService.ShowMessageBox("Error", e.Message);
+        }
+    }
+
+
+    private async Task<string> ValidateEmail(string email) {
+        if (string.IsNullOrEmpty(email) || string.IsNullOrWhiteSpace(email))
+            return null!;
+
+        try {
+            //await _form.Validate();
+            if (_form.IsValid) {
+                var usr = await UserRepo.GetByEmailAsync(email, Cts.Token);
+                if (usr is not null)
+                    return "Email already in use!";
+            }
+        }
+        catch (TaskCanceledException) {
+            Logger.LogWarning("Email validation canceled");
+        }
+        catch (OperationCanceledException) {
+            Logger.LogWarning("Email validation canceled");
+        }
+        catch (Exception e) {
+            Logger.LogError(e, "Error while validating email");
+        }
+        return null!;
+    }
+
+}

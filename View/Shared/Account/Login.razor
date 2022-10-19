@@ -1,0 +1,116 @@
+﻿@page "/login"
+@inject NavigationManager Nav
+@inject IUserState UserState
+@inject ISnackbar Snackbar
+@inject IUserRepository UserRepo
+@inject IDialogService DialogService
+@inject ProtectedLocalStorage Local
+@inject ILogger<Login> Logger
+@using Domain.Extensions
+@inherits CancellationComponent
+
+<div @onkeydown="TryLogin">
+    <MudForm @ref="_form">
+    <MudCard Style="width: 100%">
+        <MudCardHeader>
+            <MudText Typo="Typo.h5">Login</MudText>
+            @if (UserState.User is not null) {
+                <MudSpacer/>
+                <MudText Typo="Typo.subtitle1" Color="Color.Info">You are already logged in, but you can still change accounts</MudText>
+            }
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField
+                T="string" Immediate="true" InputType="InputType.Email" InputMode="InputMode.email"
+                Label="E-Mail"
+                Required="true" RequiredError="E-Mail is required!"
+                @bind-Value="LogEmail"/>
+            <MudTextField
+                T="string" Immediate="true" InputMode="InputMode.text"
+                Label="Password"
+                Class="mt-3" Required="true" RequiredError="Password is required!"
+                InputType="_passwordInputType" Adornment="Adornment.End"
+                AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="ShowPwd"
+                @bind-Value="LogPassword"/>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="async () => await HandleLoginAsync()">Login</MudButton>
+            <MudSpacer/>
+            <a href="register">
+                <MudText Typo="Typo.subtitle1">
+                    Don't have an account?
+                </MudText>
+            </a>
+        </MudCardActions>
+    </MudCard>
+    </MudForm>
+</div>
+
+@code {
+    // initialized by @ref
+    private MudForm _form = null!;
+    
+    // password visibility
+    private bool _isShow;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+    private InputType _passwordInputType = InputType.Password;
+
+    private string? LogEmail { get; set; }
+    private string? LogPassword { get; set; }
+
+    private void ShowPwd() {
+        if (_isShow) {
+            _isShow = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInputType = InputType.Password;
+        }
+        else {
+            _isShow = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInputType = InputType.Text;
+        }
+    }
+
+    private async void TryLogin(KeyboardEventArgs e) {
+        if (e.Code is "Enter" or "NumpadEnter")
+            await HandleLoginAsync();
+    }
+
+    private async Task HandleLoginAsync() {
+        try {
+            // Validate the form
+            if (!await _form.IsFormValidAsync())
+                return;
+            
+            // check account
+            if (!await UserRepo.CheckLoginDetailsAsync(LogEmail, LogPassword, Cts.Token)) {
+                Snackbar.Add("Invalid username or password", Severity.Error);
+                LogPassword = string.Empty;
+                return;
+            }
+            // grab the user
+            var user = await UserRepo.ReadAuthGraphAsync(LogEmail, Cts.Token);
+
+            // write to localstorage(user gets automatically logged in)
+            await Local.SetAsync("Id", user!.Id.ToString());
+            // set the user in the scoped service
+            UserState.User = user;
+            // show the user that he is logged in
+            Snackbar.Add("Login Successful!", Severity.Success);
+            // notify the app that the user data has changed
+            UserState.NotifyDataChange();
+            Nav.NavigateTo("/");
+        }
+        catch (TaskCanceledException) {
+            Logger.LogWarning("Login canceled");
+        }
+        catch (OperationCanceledException) {
+            Logger.LogWarning("Login canceled");
+        }
+        catch (Exception e) {
+            Logger.LogError(e, "Login failed");
+            await DialogService.ShowMessageBox("Error", e.Message);
+        }
+    }
+
+}
